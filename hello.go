@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	// Create and install browsers
 	err := playwright.Install()
 	if err != nil {
 		log.Fatalf("could not install browsers: %v", err)
@@ -30,6 +32,7 @@ func main() {
 		log.Fatalf("could not create page: %v", err)
 	}
 
+	fmt.Println("[#] Fetching login form...")
 	if _, err = page.Goto(
 		"https://blpl.greythr.com/uas/portal/auth/login",
 		playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
@@ -42,11 +45,13 @@ func main() {
 		log.Fatalf("could not create screenshot: %v", err)
 	}
 
+	fmt.Println("[#] Submitting login form...")
 	loginForm := page.Locator("form").First()
 	username := loginForm.Locator("input[id=username]")
 	password := loginForm.Locator("input[id=password]")
 	loginButton := loginForm.Locator("button[type='submit']")
 
+	// Fill in login form
 	if username.Fill(os.Getenv("GREYTHR_USERNAME")); err != nil {
 		log.Fatalf("Could not fill in username: %v", err)
 	}
@@ -65,7 +70,7 @@ func main() {
 		log.Fatalf("Could not click login button: %v", err)
 	}
 
-	page.WaitForURL("**/v3/portal/ess/home", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) // Adjust to expected URL
+	page.WaitForURL("**/home", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) // Adjust to expected URL
 
 	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("debug/logged_in.png"),
@@ -73,6 +78,30 @@ func main() {
 		log.Fatalf("could not create screenshot: %v", err)
 	}
 
+	// Go to leave balance page
+	fmt.Println("[#] Fetching leave balance...")
+	if _, err = page.Goto(
+		"https://blpl.greythr.com/v3/portal/ess/leave/leave-balance",
+		playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
+		log.Fatalf("could not goto: %v", err)
+	}
+
+	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
+		Path: playwright.String("debug/leave_balance_page.png"),
+	}); err != nil {
+		log.Fatalf("could not create screenshot: %v", err)
+	}
+
+	page.WaitForURL("**/leave/leave-balance", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
+
+	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
+		Path: playwright.String("debug/leave_balances_menu.png"),
+	}); err != nil {
+		log.Fatalf("could not create screenshot: %v", err)
+	}
+
+	// Logout
+	fmt.Println("[#] Find and click \"Logout\" button...")
 	logoutButton := page.Locator("a[title='Logout']")
 	if logoutButton.Click(); err != nil {
 		log.Fatalf("Could not find logout button: %v", err)
@@ -92,5 +121,4 @@ func main() {
 	if err = pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v", err)
 	}
-
 }
