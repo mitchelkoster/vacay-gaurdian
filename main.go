@@ -109,7 +109,8 @@ func visitGreytHR(page playwright.Page) {
 }
 
 func logoutGreytHR(page playwright.Page) {
-	// Logout
+	var err error = nil
+
 	fmt.Println("[#] Find and click \"Logout\" button...")
 	logoutButton := page.Locator("a[title='Logout']")
 	if logoutButton.Click(); err != nil {
