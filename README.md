@@ -1,16 +1,22 @@
 # Vacay Gaurdian
-Automatically take snapshots of my vacation hours from [https://blpl.greythr.com/](https://blpl.greythr.com/).
-
-
+Automatically take snapshots of my vacation hours from [https://blpl.greythr.com/](https://blpl.greythr.com/) so I can keep a ledger of vacation hours available.
 
 ## Usage
-For now this will need to run with your credentials configured in `environment` variables.
+When ran in normal mode you will be prompted for credentials before gathering results under `~/Documents/vacay` or `C:\Users\<username>\Documents\vacay`.
+
+```bash
+go run ./main.go
+
+GreytHR username:
+GreytHR password:
+```
+
+To enable debugging add the following `environment` variables:
 
 ```bash
 export GREYTHR_USERNAME="<USERNAME>"
 export GREYTHR_PASSWORD="<PASSWORD>"
-
-go run ./main.go
+export GREYTHR_DEBUG="true"
 ```
 
 ## Reviewing vacation hours

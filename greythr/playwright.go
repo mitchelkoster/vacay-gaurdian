@@ -32,11 +32,11 @@ func StartPlaywright(headless bool) (*playwright.Playwright, playwright.Browser,
 	return pw, browser, page
 }
 
-func Screenshot(page playwright.Page, name string) {
+func Screenshot(page playwright.Page, location string) {
 	var err error = nil
 
 	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
-		Path: playwright.String(name),
+		Path: playwright.String(location),
 	}); err != nil {
 		log.Fatalf("could not create screenshot: %v", err)
 	}

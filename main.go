@@ -2,14 +2,14 @@ package main
 
 import (
 	"bufio"
-	"example/vacay/greythr"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/playwright-community/playwright-go"
+	"example/vacay/greythr"
+	"example/vacay/utils"
 )
 
 func captureInput(display string, reader *bufio.Reader) (string, error) {
@@ -50,7 +50,11 @@ func main() {
 	username, password, err := getCredentials()
 	if err != nil {
 		log.Fatalf("Error reading credentails: %v", err)
-		os.Exit(1)
+	}
+
+	storageDir, debugDir := utils.AppDirs()
+	if storageDir == "" || debugDir == "" {
+		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
 
 	headless := true
@@ -61,19 +65,10 @@ func main() {
 	defer browser.Close()
 	defer pw.Stop()
 
-	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		if _, err = page.Goto(
-			"file:///home/mitchel/Code/vacay-gaurdian/debug/greytHR.html",
-			playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
-			log.Fatalf("could not goto: %v", err)
-		}
-	} else {
-		greythr.Login(page, username, password)
-	}
-
+	greythr.Login(page, username, password)
 	leaves := greythr.ParseLeaves(page)
 
-	fh, err := os.OpenFile("logs/vacation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	fh, err := os.OpenFile(storageDir+"/vacation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -87,7 +82,7 @@ func main() {
 		fmt.Fprintf(fh, " - Granted Count: \t%.2f\n\n", leave.GrantedCount)
 	}
 
-	greythr.Screenshot(page, "logs/"+currentDate+".png")
+	greythr.Screenshot(page, storageDir+"/"+currentDate+".png")
 
 	if os.Getenv("GREYTHR_DEBUG") != "true" {
 		greythr.Logout(page)
@@ -95,6 +90,6 @@ func main() {
 
 	err = greythr.ClosePlaywright(pw, browser)
 	if err != nil {
-		os.Exit(1)
+		log.Fatalf("Could not close Playwright: %v", err)
 	}
 }

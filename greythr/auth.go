@@ -5,11 +5,18 @@ import (
 	"log"
 	"os"
 
+	"example/vacay/utils"
+
 	"github.com/playwright-community/playwright-go"
 )
 
 func Login(page playwright.Page, username string, password string) {
 	var err error = nil
+
+	storageDir, debugDir := utils.AppDirs()
+	if storageDir == "" || debugDir == "" {
+		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
+	}
 
 	fmt.Println("[#] Fetching login form...")
 	if _, err = page.Goto(
@@ -19,7 +26,7 @@ func Login(page playwright.Page, username string, password string) {
 	}
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		Screenshot(page, "../debug/login_page.png")
+		Screenshot(page, debugDir+"/login_page.png")
 	}
 
 	fmt.Println("[#] Submitting login form...")
@@ -38,7 +45,7 @@ func Login(page playwright.Page, username string, password string) {
 	}
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		Screenshot(page, "../debug/login_page_filled.png")
+		Screenshot(page, debugDir+"/login_page_filled.png")
 	}
 
 	if loginButton.Click(); err != nil {
@@ -48,7 +55,7 @@ func Login(page playwright.Page, username string, password string) {
 	page.WaitForURL("**/home", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) // Adjust to expected URL
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		Screenshot(page, "../debug/logged_in.png")
+		Screenshot(page, debugDir+"/logged_in.png")
 	}
 
 	// Go to leave balance page
@@ -62,7 +69,7 @@ func Login(page playwright.Page, username string, password string) {
 	page.WaitForURL("**/leave/leave-balance", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		Screenshot(page, "../debug/leave_balance_page.png")
+		Screenshot(page, debugDir+"/leave_balance_page.png")
 	}
 
 }
@@ -78,7 +85,12 @@ func Logout(page playwright.Page) {
 
 	page.WaitForURL("**/auth/logout", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
 
+	storageDir, debugDir := utils.AppDirs()
+	if storageDir == "" || debugDir == "" {
+		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
+	}
+
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		Screenshot(page, "../debug/logged_out.png")
+		Screenshot(page, debugDir+"/logged_out.png")
 	}
 }
