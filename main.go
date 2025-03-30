@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -55,7 +56,7 @@ func screenshot(page playwright.Page, name string) {
 	}
 }
 
-func visitGreytHR(page playwright.Page) {
+func visitGreytHR(page playwright.Page, username string, password string) {
 	var err error = nil
 
 	fmt.Println("[#] Fetching login form...")
@@ -69,16 +70,16 @@ func visitGreytHR(page playwright.Page) {
 
 	fmt.Println("[#] Submitting login form...")
 	loginForm := page.Locator("form").First()
-	username := loginForm.Locator("input[id=username]")
-	password := loginForm.Locator("input[id=password]")
+	usernameField := loginForm.Locator("input[id=username]")
+	passwordField := loginForm.Locator("input[id=password]")
 	loginButton := loginForm.Locator("button[type='submit']")
 
 	// Log in
-	if username.Fill(os.Getenv("GREYTHR_USERNAME")); err != nil {
+	if usernameField.Fill(username); err != nil {
 		log.Fatalf("Could not fill in username: %v", err)
 	}
 
-	if password.Fill(os.Getenv("GREYTHR_PASSWORD")); err != nil {
+	if passwordField.Fill(password); err != nil {
 		log.Fatalf("Could not fill in password: %v", err)
 	}
 
@@ -123,7 +124,31 @@ func logoutGreytHR(page playwright.Page) {
 
 }
 
+func captureInput(display string, reader *bufio.Reader) (string, error) {
+	fmt.Println(display)
+
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatalf("could not read user input: %v", err)
+		return "", err
+	}
+
+	text = strings.TrimSuffix(text, "\r\n")
+	text = strings.TrimSpace(text)
+
+	return text, nil
+}
+
 func main() {
+	username := os.Getenv("GREYTHR_USERNAME")
+	password := os.Getenv("GREYTHR_PASSWORD")
+
+	if username == "" && password == "" {
+		reader := bufio.NewReader(os.Stdin)
+		username, _ = captureInput("GreytHR username: ", reader)
+		password, _ = captureInput("GreytHR password: ", reader)
+	}
+
 	currentTime := time.Now().Local()
 	currentDate := currentTime.Format("02-01-2006")
 
@@ -150,15 +175,16 @@ func main() {
 		log.Fatalf("could not create page: %v", err)
 	}
 
-	/* DEBUG
-	fmt.Println("[#] Fetching login form...")
-	if _, err = page.Goto(
-		"file:///home/mitchel/Code/vacay-gaurdian/debug/greytHR.html",
-		playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
-		log.Fatalf("could not goto: %v", err)
+	if os.Getenv("GREYTHR_DEBUG") == "true" {
+		if _, err = page.Goto(
+			"file:///home/mitchel/Code/vacay-gaurdian/debug/greytHR.html",
+			playwright.PageGotoOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
+			log.Fatalf("could not goto: %v", err)
+		}
+	} else {
+		fmt.Println("[#] Fetching login form...")
+		visitGreytHR(page, username, password)
 	}
-	*/
-	visitGreytHR(page)
 
 	leaves := parseLeaves(page)
 
@@ -178,7 +204,9 @@ func main() {
 
 	screenshot(page, "debug/"+currentDate+"_test.png")
 
-	logoutGreytHR(page)
+	if os.Getenv("GREYTHR_DEBUG") != "true" {
+		logoutGreytHR(page)
+	}
 
 	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
