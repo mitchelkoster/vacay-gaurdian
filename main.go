@@ -12,6 +12,7 @@ import (
 	"example/vacay/greythr"
 	"example/vacay/storage"
 
+	"github.com/zalando/go-keyring"
 	"golang.org/x/term"
 )
 
@@ -32,8 +33,8 @@ func readUserName(display string, reader *bufio.Reader) (string, error) {
 
 func readPassword(display string, reader *bufio.Reader) (string, error) {
 	fmt.Print(display)
+	fmt.Println()
 
-	// text, err := reader.ReadString('\n')
 	password, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		log.Fatalf("could not read user input: %v", err)
@@ -45,23 +46,38 @@ func readPassword(display string, reader *bufio.Reader) (string, error) {
 
 func getCredentials() (string, string, error) {
 	var err error
+	service := "vacay-gaurdian"
 
 	// Grab from enviroment if possible
 	username := os.Getenv("GREYTHR_USERNAME")
 	password := os.Getenv("GREYTHR_PASSWORD")
 
-	// Fall back to user input
-	if username == "" || password == "" {
-		reader := bufio.NewReader(os.Stdin)
+	if username != "" && password != "" {
+		return username, password, nil
+	}
 
-		username, err = readUserName("GreytHR username: ", reader)
-		if err != nil {
-			log.Fatal("Could not read username")
-		}
+	// Obtain username from STDIN
+	reader := bufio.NewReader(os.Stdin)
+	username, err = readUserName("GreytHR username: ", reader)
+	if err != nil {
+		log.Fatal("Could not read username")
+	}
 
+	// Check local OS keyring for password
+	password, err = keyring.Get(service, username)
+	if err != nil {
+		fmt.Println("Not in keyring")
+		// If not found, prompt the user
 		password, err = readPassword("GreytHR password: ", reader)
 		if err != nil {
-			log.Fatal("Could not read password")
+			log.Fatal("Could not read password from STDIN")
+		}
+
+		// Store user provided password
+		err = keyring.Set(service, username, password)
+		fmt.Println("Setting:", service, username, password)
+		if err != nil {
+			log.Fatal("Could not set password in keyring")
 		}
 	}
 
@@ -72,6 +88,7 @@ func main() {
 	currentTime := time.Now().Local()
 	currentDate := currentTime.Format("02-01-2006")
 
+	// Grab credentials and store in keychain
 	username, password, err := getCredentials()
 	if err != nil {
 		log.Fatalf("Error reading credentails: %v", err)
