@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"example/vacay/utils"
+	"example/vacay/storage"
 
 	"github.com/playwright-community/playwright-go"
 )
@@ -13,7 +13,7 @@ import (
 func Login(page playwright.Page, username string, password string) {
 	var err error
 
-	storageDir, debugDir := utils.AppDirs()
+	storageDir, debugDir := storage.AppDirs()
 	if storageDir == "" || debugDir == "" {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
@@ -90,7 +90,7 @@ func Logout(page playwright.Page) {
 		log.Fatalf("Could not wait for page to load")
 	}
 
-	storageDir, debugDir := utils.AppDirs()
+	storageDir, debugDir := storage.AppDirs()
 	if storageDir == "" || debugDir == "" {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}

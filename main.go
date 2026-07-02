@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"example/vacay/greythr"
-	"example/vacay/utils"
+	"example/vacay/storage"
 
 	"golang.org/x/term"
 )
@@ -77,7 +77,7 @@ func main() {
 		log.Fatalf("Error reading credentails: %v", err)
 	}
 
-	storageDir, debugDir := utils.AppDirs()
+	storageDir, debugDir := storage.AppDirs()
 	if storageDir == "" || debugDir == "" {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
