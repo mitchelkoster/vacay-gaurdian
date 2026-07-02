@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -38,30 +37,11 @@ func main() {
 	defer pw.Stop()
 
 	greythr.Login(page, username, password)
-	leaves := greythr.ParseLeaves(page)
 
 	// Write results to log file
-	fh, err := os.OpenFile(storageDir+"/vacation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	err = greythr.WriteLeaveEntry(greythr.ParseLeaves(page), currentDate)
 	if err != nil {
-		fmt.Println("Error opening file:", err)
-		return
-	}
-	defer fh.Close()
-
-	_, err = fmt.Fprintf(fh, "[%s]\n", currentDate)
-	if err != nil {
-		log.Fatal("Could not write to file")
-	}
-
-	for _, leave := range leaves {
-		_, err = fmt.Fprintf(fh, " - Leave Name: \t\t%s\nBalance Count: \t%.2f\nGranted Count: \t%.2f\n\n",
-			leave.Name,
-			leave.BalanceCount,
-			leave.GrantedCount)
-
-		if err != nil {
-			log.Fatal("Could not writge to file")
-		}
+		log.Fatalf("Could not write log entry: %v", err)
 	}
 
 	// Grab screenshot

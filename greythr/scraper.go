@@ -1,7 +1,10 @@
 package greythr
 
 import (
+	"example/vacay/storage"
+	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -49,6 +52,37 @@ func ParseLeaves(page playwright.Page) []Leave {
 	}
 
 	return cardList
+}
+
+func WriteLeaveEntry(leaves []Leave, currentDate string) error {
+	storageDir, debugDir := storage.AppDirs()
+	if storageDir == "" || debugDir == "" {
+		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
+	}
+
+	fh, err := os.OpenFile(storageDir+"/vacation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return nil
+	}
+	defer fh.Close()
+
+	_, err = fmt.Fprintf(fh, "[%s]\n", currentDate)
+	if err != nil {
+		log.Fatal("Could not write to file")
+	}
+
+	for _, leave := range leaves {
+		_, err = fmt.Fprintf(fh, " - Leave Name: \t\t%s\nBalance Count: \t%.2f\nGranted Count: \t%.2f\n\n",
+			leave.Name,
+			leave.BalanceCount,
+			leave.GrantedCount)
+
+		if err != nil {
+			log.Fatal("Could not writge to file")
+		}
+	}
+	return nil
 }
 
 func extractNumber(text string) float64 {
