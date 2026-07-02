@@ -11,7 +11,7 @@ import (
 )
 
 func Login(page playwright.Page, username string, password string) {
-	var err error = nil
+	var err error
 
 	storageDir, debugDir := utils.AppDirs()
 	if storageDir == "" || debugDir == "" {
@@ -36,11 +36,11 @@ func Login(page playwright.Page, username string, password string) {
 	loginButton := loginForm.Locator("button[type='submit']")
 
 	// Log in
-	if usernameField.Fill(username); err != nil {
+	if err := usernameField.Fill(username); err != nil {
 		log.Fatalf("Could not fill in username: %v", err)
 	}
 
-	if passwordField.Fill(password); err != nil {
+	if err := passwordField.Fill(password); err != nil {
 		log.Fatalf("Could not fill in password: %v", err)
 	}
 
@@ -48,11 +48,13 @@ func Login(page playwright.Page, username string, password string) {
 		Screenshot(page, debugDir+"/login_page_filled.png")
 	}
 
-	if loginButton.Click(); err != nil {
+	if err := loginButton.Click(); err != nil {
 		log.Fatalf("Could not click login button: %v", err)
 	}
 
-	page.WaitForURL("**/home", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}) // Adjust to expected URL
+	if err := page.WaitForURL("**/home", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
+		log.Fatalf("Could not wait for page to load")
+	}
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
 		Screenshot(page, debugDir+"/logged_in.png")
@@ -66,7 +68,9 @@ func Login(page playwright.Page, username string, password string) {
 		log.Fatalf("could not goto: %v", err)
 	}
 
-	page.WaitForURL("**/leave/leave-balance", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
+	if err := page.WaitForURL("**/leave/leave-balance", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
+		log.Fatalf("Could not wait for page to load")
+	}
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
 		Screenshot(page, debugDir+"/leave_balance_page.png")
@@ -75,15 +79,16 @@ func Login(page playwright.Page, username string, password string) {
 }
 
 func Logout(page playwright.Page) {
-	var err error = nil
-
 	fmt.Println("[#] Find and click \"Logout\" button...")
+
 	logoutButton := page.Locator("a[title='Logout']")
-	if logoutButton.Click(); err != nil {
+	if err := logoutButton.Click(); err != nil {
 		log.Fatalf("Could not find logout button: %v", err)
 	}
 
-	page.WaitForURL("**/auth/logout", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle})
+	if err := page.WaitForURL("**/auth/logout", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
+		log.Fatalf("Could not wait for page to load")
+	}
 
 	storageDir, debugDir := utils.AppDirs()
 	if storageDir == "" || debugDir == "" {

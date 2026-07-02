@@ -82,10 +82,7 @@ func main() {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
 
-	headless := true
-	if os.Getenv("GREYTHR_DEBUG") == "true" {
-		headless = false
-	}
+	headless := (os.Getenv("GREYTHR_DEBUG") == "true")
 	pw, browser, page := greythr.StartPlaywright(headless)
 	defer browser.Close()
 	defer pw.Stop()
@@ -93,6 +90,7 @@ func main() {
 	greythr.Login(page, username, password)
 	leaves := greythr.ParseLeaves(page)
 
+	// Write results to log file
 	fh, err := os.OpenFile(storageDir+"/vacation.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -100,13 +98,23 @@ func main() {
 	}
 	defer fh.Close()
 
-	fmt.Fprintf(fh, "[%s]\n", currentDate)
-	for _, leave := range leaves {
-		fmt.Fprintf(fh, " - Leave Name: \t\t%s\n", leave.Name)
-		fmt.Fprintf(fh, " - Balance Count: \t%.2f\n", leave.BalanceCount)
-		fmt.Fprintf(fh, " - Granted Count: \t%.2f\n\n", leave.GrantedCount)
+	_, err = fmt.Fprintf(fh, "[%s]\n", currentDate)
+	if err != nil {
+		log.Fatal("Could not write to file")
 	}
 
+	for _, leave := range leaves {
+		_, err = fmt.Fprintf(fh, " - Leave Name: \t\t%s\nBalance Count: \t%.2f\nGranted Count: \t%.2f\n\n",
+			leave.Name,
+			leave.BalanceCount,
+			leave.GrantedCount)
+
+		if err != nil {
+			log.Fatal("Could not writge to file")
+		}
+	}
+
+	// Grab screenshot
 	greythr.Screenshot(page, storageDir+"/"+currentDate+".png")
 
 	if os.Getenv("GREYTHR_DEBUG") != "true" {

@@ -33,7 +33,7 @@ func StartPlaywright(headless bool) (*playwright.Playwright, playwright.Browser,
 }
 
 func Screenshot(page playwright.Page, location string) {
-	var err error = nil
+	var err error
 
 	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String(location),
