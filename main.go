@@ -6,38 +6,63 @@ import (
 	"log"
 	"os"
 	"strings"
+	"syscall"
 	"time"
 
 	"example/vacay/greythr"
 	"example/vacay/utils"
+
+	"golang.org/x/term"
 )
 
-func captureInput(display string, reader *bufio.Reader) (string, error) {
-	fmt.Println(display)
+func readUserName(display string, reader *bufio.Reader) (string, error) {
+	fmt.Print(display)
 
-	text, err := reader.ReadString('\n')
+	username, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatalf("could not read user input: %v", err)
 		return "", err
 	}
 
-	text = strings.TrimSuffix(text, "\r\n")
-	text = strings.TrimSpace(text)
+	username = strings.TrimSuffix(username, "\r\n")
+	username = strings.TrimSpace(username)
 
-	return text, nil
+	return username, nil
+}
+
+func readPassword(display string, reader *bufio.Reader) (string, error) {
+	fmt.Print(display)
+
+	// text, err := reader.ReadString('\n')
+	password, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		log.Fatalf("could not read user input: %v", err)
+		return "", err
+	}
+
+	return string(password), nil
 }
 
 func getCredentials() (string, string, error) {
 	var err error
 
+	// Grab from enviroment if possible
 	username := os.Getenv("GREYTHR_USERNAME")
 	password := os.Getenv("GREYTHR_PASSWORD")
 
+	// Fall back to user input
 	if username == "" || password == "" {
 		reader := bufio.NewReader(os.Stdin)
 
-		username, err = captureInput("GreytHR username: ", reader)
-		password, err = captureInput("GreytHR password: ", reader)
+		username, err = readUserName("GreytHR username: ", reader)
+		if err != nil {
+			log.Fatal("Could not read username")
+		}
+
+		password, err = readPassword("GreytHR password: ", reader)
+		if err != nil {
+			log.Fatal("Could not read password")
+		}
 	}
 
 	return username, password, err
