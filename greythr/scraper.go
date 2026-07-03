@@ -73,10 +73,11 @@ func WriteLeaveEntry(leaves []Leave, currentDate string) error {
 	}
 
 	for _, leave := range leaves {
-		_, err = fmt.Fprintf(fh, " - Leave Name: \t\t%s\nBalance Count: \t%.2f\nGranted Count: \t%.2f\n\n",
-			leave.Name,
+		_, err = fmt.Fprintf(fh, "Leave Name: \t%s\nBalance Count: \t%.2f\nGranted Count: \t%.2f\n\n",
+			strings.Trim(leave.Name, " "),
 			leave.BalanceCount,
-			leave.GrantedCount)
+			leave.GrantedCount,
+		)
 
 		if err != nil {
 			log.Fatal("Could not writge to file")
