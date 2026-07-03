@@ -1,31 +1,13 @@
 # Vacay Gaurdian
 
-Automatically take snapshots of my vacation hours from [https://blpl.greythr.com/](https://blpl.greythr.com/) so I can keep a ledger of vacation hours available.
+Automatically take snapshots of my vacation hours from [https://blpl.greythr.com/](https://blpl.greythr.com/). When vacation hours changes you'll receive a destkop notification of the changes compared to the last run.
 
-## Usage
+Historical records will be kept in:
 
-When ran in normal mode you will be prompted for credentials before gathering results under `~/Documents/vacay` or `C:\Users\<username>\Documents\vacay`.
+- `~/Documents/vacay` on Linux or Mac
+- `C:\Users\<username>\Documents\vacay` for Windows
 
-```bash
-go run ./main.go
-
-GreytHR username:
-GreytHR password:
-```
-
-If you ever need to remove your password:
-
-```bash
-secret-tool clear attribute-name attribute-value
-```
-
-To enable debugging add the following `environment` variables:
-
-```bash
-export GREYTHR_USERNAME="<USERNAME>"
-export GREYTHR_PASSWORD="<PASSWORD>"
-export GREYTHR_DEBUG="true"
-```
+The password will be securely stored under your operating systems key manager.
 
 ## Reviewing vacation hours
 
@@ -68,3 +50,49 @@ The screenshot below is an example capture of just one entry in the log.
  - Granted Count:  5.00
  ```
 
+## Usage from the command line
+
+```bash
+./vacay
+
+GreytHR username:
+GreytHR password:
+```
+
+To remove the password from your key-chain you can use:
+
+```bash
+./vacay clear
+```
+
+## Usage with Environment Variables
+
+If you want to run Vacay Gaurdian fully automated you'll need to set the following environment variables:
+
+**On Mac or Linux:**
+
+```bash
+export GREYTHR_USERNAME="<USERNAME>"
+export GREYTHR_PASSWORD="<PASSWORD>"
+```
+
+**On Windows:**
+
+```bash
+set GREYTHR_USERNAME="<USERNAME>"
+set GREYTHR_PASSWORD="<PASSWORD>"
+```
+
+To enable debugging set the `GREYTHR_DEBUG` environment variables:
+
+**On Mac or Linux:**
+
+```bash
+export GREYTHR_DEBUG="true"
+```
+
+**On Windows:**
+
+```bash
+set GREYTHR_DEBUG="true"
+```
