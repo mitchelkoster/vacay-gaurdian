@@ -61,7 +61,7 @@ func GetCredentials() (string, string, error) {
 	// Check local OS keyring for password
 	password, err = keyring.Get(service, username)
 	if err != nil {
-		fmt.Println("Not in keyring")
+		fmt.Println("Storing password in keyring")
 		// If not found, prompt the user
 		password, err = readPassword("GreytHR password: ", reader)
 		if err != nil {
@@ -70,7 +70,6 @@ func GetCredentials() (string, string, error) {
 
 		// Store user provided password
 		err = keyring.Set(service, username, password)
-		fmt.Println("Setting:", service, username, password)
 		if err != nil {
 			log.Fatal("Could not set password in keyring")
 		}

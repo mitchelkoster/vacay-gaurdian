@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
 
-	headless := (os.Getenv("GREYTHR_DEBUG") == "true")
+	headless := (os.Getenv("GREYTHR_DEBUG") == "" || os.Getenv("GREYTHR_DEBUG") == "false")
 	pw, browser, page := greythr.StartPlaywright(headless)
 	defer browser.Close()
 	defer pw.Stop()
@@ -47,7 +47,7 @@ func main() {
 	// Grab screenshot
 	greythr.Screenshot(page, storageDir+"/"+currentDate+".png")
 
-	if os.Getenv("GREYTHR_DEBUG") != "true" {
+	if os.Getenv("GREYTHR_DEBUG") == "" || os.Getenv("GREYTHR_DEBUG") == "false" {
 		greythr.Logout(page)
 	}
 
