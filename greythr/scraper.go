@@ -1,21 +1,18 @@
 package greythr
 
 import (
+	_ "embed"
 	"example/vacay/storage"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/gen2brain/beeep"
 	"github.com/playwright-community/playwright-go"
 )
-
-type Leave struct {
-	Name         string
-	GrantedCount float64
-	BalanceCount float64
-}
 
 func ParseLeaves(page playwright.Page) []Leave {
 	cards, err := page.Locator("div.leave-balance-card").All()
@@ -26,19 +23,19 @@ func ParseLeaves(page playwright.Page) []Leave {
 	var cardList []Leave
 
 	for _, card := range cards {
-		cardName, _ := card.Locator("div.leave-type-name").TextContent()
+		cardName, err := card.Locator("div.leave-type-name").TextContent()
 		if err != nil {
 			log.Printf("error getting leave name: %v", err)
 			continue
 		}
 
-		grantedCount, _ := card.Locator("div.granted-count[title]").TextContent()
+		grantedCount, err := card.Locator("div.granted-count[title]").TextContent()
 		if err != nil {
 			log.Printf("error getting granted count: %v", err)
 			continue
 		}
 
-		balanceCount, _ := card.Locator("div.card-current").TextContent()
+		balanceCount, err := card.Locator("div.card-current").TextContent()
 		if err != nil {
 			log.Printf("error getting balance count: %v", err)
 			continue
@@ -54,7 +51,42 @@ func ParseLeaves(page playwright.Page) []Leave {
 	return cardList
 }
 
-func WriteLeaveEntry(leaves []Leave, currentDate string) error {
+func HandleLeaveNotification(currentLeave, previousLeave LeaveState, appName string, icon []byte) {
+	beeep.AppName = appName
+	var messageBody string
+	var sb strings.Builder
+
+	// See if a previous state has been found
+	if len(previousLeave.Leaves) == 0 {
+		fmt.Println("No previous leave detected")
+
+		for _, leave := range currentLeave.Leaves {
+			fmt.Fprintf(&sb, "%s: +%.2f\n", leave.Name, leave.BalanceCount)
+		}
+	} else {
+		fmt.Println("Previous leave detected")
+
+		for i, current := range currentLeave.Leaves {
+			previous := previousLeave.Leaves[i]
+			delta := current.BalanceCount - previous.BalanceCount
+
+			fmt.Fprintf(&sb, "%s: %+.2f\n", current.Name, delta)
+		}
+	}
+
+	messageBody = sb.String()
+
+	// Send notification
+	err := beeep.Notify(currentLeave.Date, messageBody, icon)
+	if err != nil {
+		log.Printf("Could not  send notification: %v\n", err)
+	}
+}
+
+func WriteLeaveEntry(leaves []Leave) error {
+	currentTime := time.Now().Local()
+	currentDate := currentTime.Format("02-01-2006")
+
 	storageDir, debugDir := storage.AppDirs()
 	if storageDir == "" || debugDir == "" {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)

@@ -78,7 +78,7 @@ func Login(page playwright.Page, username string, password string) {
 
 }
 
-func Logout(page playwright.Page) {
+func Logout(page playwright.Page, debugMode bool) {
 	fmt.Println("[#] Find and click \"Logout\" button...")
 
 	logoutButton := page.Locator("a[title='Logout']")
@@ -95,7 +95,7 @@ func Logout(page playwright.Page) {
 		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
 
-	if os.Getenv("GREYTHR_DEBUG") == "true" {
+	if debugMode {
 		Screenshot(page, debugDir+"/logged_out.png")
 	}
 }
