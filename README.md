@@ -11,7 +11,13 @@ The password will be securely stored under your operating systems key manager.
 
 ## Reviewing vacation hours
 
-Logs are stored in `logs/` folder with both **screenshots** and a **ledger**.
+For auditing purposes logs are stored in `logs/` folder with both **screenshots** and **ledger entries**.
+
+### Notifications
+
+Every time Vacay Gaurdian runs will compare the last entry stored in `last_state.json` to the currently retreived leave balance. It will provide a notification updating you on the most recent balance change.
+
+![Example Notification](images/notification_example.png)
 
 ### Screenshots
 
@@ -19,7 +25,7 @@ Every time Vacay Gaurdian runs it stores proof-of-leave in the `logs/` folder wi
 
 The screenshot below is an example capture for `logs/30-03-2025.png`.
 
-![Example Hours](example.png)
+![Example Hours](images/example.png)
 
 ### Ledger
 
