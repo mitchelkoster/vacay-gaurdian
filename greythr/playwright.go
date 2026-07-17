@@ -3,7 +3,7 @@ package greythr
 import (
 	"log"
 
-	"github.com/playwright-community/playwright-go"
+	"github.com/mxschmitt/playwright-go"
 )
 
 func StartPlaywright(headless bool) (*playwright.Playwright, playwright.Browser, playwright.Page) {

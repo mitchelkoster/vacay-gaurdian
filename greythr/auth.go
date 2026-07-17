@@ -7,7 +7,7 @@ import (
 
 	"example/vacay/storage"
 
-	"github.com/playwright-community/playwright-go"
+	"github.com/mxschmitt/playwright-go"
 )
 
 func Login(page playwright.Page, username string, password string) {

@@ -9,6 +9,10 @@ Historical records will be kept in:
 
 The password will be securely stored under your operating systems key manager.
 
+> **NOTE for Windows Users:**
+>
+>If you use windows make sure you have the [Visual C++ v14 Redistributable](https://download.visualstudio.microsoft.com/download/pr/ebdab8e5-1d7b-4d9f-a11b-cbb1720c3b12/843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C/VC_redist.x64.exe) installed.
+
 ## Reviewing vacation hours
 
 For auditing purposes logs are stored in `logs/` folder with both **screenshots** and **ledger entries**.
