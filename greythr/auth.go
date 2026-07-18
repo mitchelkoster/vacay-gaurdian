@@ -25,6 +25,13 @@ func Login(page playwright.Page, username string, password string) {
 		log.Fatalf("could not goto: %v", err)
 	}
 
+	// Also wait for login field to be visible
+	if err := page.Locator("#username").First().WaitFor(playwright.LocatorWaitForOptions{
+		State: playwright.WaitForSelectorStateVisible,
+	}); err != nil {
+		log.Fatalf("login form did not appear: %v", err)
+	}
+
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
 		Screenshot(page, debugDir+"/login_page.png")
 	}
@@ -68,8 +75,16 @@ func Login(page playwright.Page, username string, password string) {
 		log.Fatalf("could not goto: %v", err)
 	}
 
+	// Wait for network requests to complete
 	if err := page.WaitForURL("**/leave/leave-balance", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
 		log.Fatalf("Could not wait for page to load")
+	}
+
+	// Also wait for balance card to be visible in the DOM
+	if err := page.Locator(".leave-balance-card").First().WaitFor(playwright.LocatorWaitForOptions{
+		State: playwright.WaitForSelectorStateVisible,
+	}); err != nil {
+		log.Fatalf("leave balance card did not appear: %v", err)
 	}
 
 	if os.Getenv("GREYTHR_DEBUG") == "true" {
@@ -81,11 +96,13 @@ func Login(page playwright.Page, username string, password string) {
 func Logout(page playwright.Page, debugMode bool) {
 	fmt.Println("[#] Find and click \"Logout\" button...")
 
+	// Wait for logout button
 	logoutButton := page.Locator("a[title='Logout']")
 	if err := logoutButton.Click(); err != nil {
 		log.Fatalf("Could not find logout button: %v", err)
 	}
 
+	// Wait for network requests to complete
 	if err := page.WaitForURL("**/auth/logout", playwright.PageWaitForURLOptions{WaitUntil: playwright.WaitUntilStateNetworkidle}); err != nil {
 		log.Fatalf("Could not wait for page to load")
 	}
