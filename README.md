@@ -38,27 +38,31 @@ Every time Vacay Gaurdian runs it updates a leder with leave balances over time 
 The screenshot below is an example capture of just one entry in the log.
 
 ```
-[30-03-2025]
- - Leave Name:    Loss Of Pay 
- - Balance Count:  0.00
- - Granted Count:  0.00
+[18-07-2026]
+Leave Name:  Loss Of Pay
+Balance Count:  0.00
+Granted Count:  0.00
 
- - Leave Name:    Comp - Off 
- - Balance Count:  0.00
- - Granted Count:  0.00
+Leave Name:  Comp - Off
+Balance Count:  5.50
+Granted Count:  5.50
 
- - Leave Name:    Paternity Leave 
- - Balance Count:  5.00
- - Granted Count:  5.00
+Leave Name:  Paternity Leave
+Balance Count:  5.00
+Granted Count:  5.00
 
- - Leave Name:    Casual Leave - Statutory 
- - Balance Count:  22.28
- - Granted Count:  23.28
+Leave Name:  Casual Leave - Statutory
+Balance Count:  10.90
+Granted Count:  16.90
 
- - Leave Name:    Casual Leave - Non-Statutory 
- - Balance Count:  5.00
- - Granted Count:  5.00
- ```
+Leave Name:  Casual Leave - Non-Statutory
+Balance Count:  10.34
+Granted Count:  10.34
+
+Leave Name:  Additional Paternity Unpaid
+Balance Count:  25.00
+Granted Count:  25.00
+```
 
 ## Usage from the command line
 
