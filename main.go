@@ -14,11 +14,12 @@ import (
 //go:embed resources/info.png
 var icon []byte
 
-func loadState() (greythr.LeaveState, bool, error) {
+func loadState(storageDir string) (greythr.LeaveState, bool, error) {
 	var state greythr.LeaveState
+	storageDir = fmt.Sprintf("%s/last_state.json", storageDir)
 
 	// Load last stored entry
-	data, err := os.ReadFile("last_state.json")
+	data, err := os.ReadFile(storageDir)
 	if os.IsNotExist(err) { // First run
 		return state, false, nil
 	}
@@ -31,20 +32,27 @@ func loadState() (greythr.LeaveState, bool, error) {
 	return state, true, err
 }
 
-func saveState(state greythr.LeaveState) error {
+func saveState(state greythr.LeaveState, storageDir string) error {
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile("last_state.json", data, 0644)
+	storageDir = fmt.Sprintf("%s/last_state.json", storageDir)
+	return os.WriteFile(storageDir, data, 0644)
 }
 
 func main() {
 	currentTime := time.Now().Local()
 	currentDate := currentTime.Format("02-01-2006")
 
-	previousLeaveState, previousLeaveStateFound, err := loadState()
+	// Identify application directories
+	storageDir, debugDir := storage.AppDirs()
+	if storageDir == "" || debugDir == "" {
+		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
+	}
+
+	previousLeaveState, previousLeaveStateFound, err := loadState(storageDir)
 	if err != nil {
 		log.Printf("Error loading state: %v", err)
 	}
@@ -53,11 +61,6 @@ func main() {
 	username, password, err := GetCredentials()
 	if err != nil {
 		log.Fatalf("Error reading credentails: %v", err)
-	}
-
-	storageDir, debugDir := storage.AppDirs()
-	if storageDir == "" || debugDir == "" {
-		log.Fatalf("Could not make storage directories: %s %s", storageDir, debugDir)
 	}
 
 	debugMode := (os.Getenv("GREYTHR_DEBUG") == "" || os.Getenv("GREYTHR_DEBUG") == "false")
@@ -85,7 +88,7 @@ func main() {
 	if !previousLeaveStateFound {
 		fmt.Println("Saving last state")
 		greythr.HandleLeaveNotification(currentLeaveState, greythr.LeaveState{}, "Vacay Gaurdian", icon)
-		if err := saveState(currentLeaveState); err != nil {
+		if err := saveState(currentLeaveState, storageDir); err != nil {
 			log.Fatalf("Could not save leave state: %v\n", err)
 		}
 	} else {
